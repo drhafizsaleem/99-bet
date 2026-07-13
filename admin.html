@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>99 Bet - Admin Panel</title>
+    <style>
+        body {
+            background-color: #121212; color: white; font-family: Arial, sans-serif;
+            margin: 0; padding-bottom: 50px;
+        }
+        /* Navbar */
+        .navbar {
+            background-color: #ff0000; padding: 15px 20px;
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 2px solid #ffcc00;
+        }
+        .logo { color: white; font-size: 22px; font-weight: bold; text-decoration: none; }
+        .admin-badge { background-color: #121212; color: #ffcc00; padding: 5px 10px; border-radius: 5px; font-size: 14px; font-weight: bold;}
+        
+        /* Stats Box */
+        .stats-container { padding: 20px; text-align: center; }
+        .profit-box {
+            background-color: #1e1e1e; padding: 20px; border-radius: 10px;
+            border: 1px solid #ffcc00; box-shadow: 0px 4px 10px rgba(255, 204, 0, 0.2);
+        }
+        .profit-box h3 { margin: 0; color: #aaa; font-size: 16px; }
+        .profit-amount { font-size: 32px; color: #00ff00; font-weight: bold; margin-top: 10px; }
+
+        /* Pending Withdrawals Section */
+        h2 { text-align: center; color: #ffcc00; margin-top: 30px; }
+        .requests-container { padding: 10px 20px; }
+        
+        .request-card {
+            background-color: #1e1e1e; padding: 15px; border-radius: 10px;
+            margin-bottom: 15px; border-left: 4px solid #ffcc00;
+        }
+        .req-detail { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px;}
+        .req-detail span:first-child { color: #aaa; }
+        .req-detail span:last-child { font-weight: bold; }
+        .highlight { color: #ffcc00 !important; font-size: 16px;}
+        
+        .action-btns { display: flex; gap: 10px; margin-top: 15px; }
+        .approve-btn { flex: 1; padding: 10px; background-color: #28a745; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer;}
+        .reject-btn { flex: 1; padding: 10px; background-color: #dc3545; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer;}
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .no-data { text-align: center; color: #888; font-style: italic; margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+    <div class="navbar">
+        <a href="dashboard.html" class="logo">99 Bet | ADMIN</a>
+        <div class="admin-badge">Control Room</div>
+    </div>
+
+    <!-- Admin Profit Stats -->
+    <div class="stats-container">
+        <div class="profit-box">
+            <h3>Total Admin Profit (5% Fees)</h3>
+            <div class="profit-amount">💰 <span id="totalProfitDisplay">0</span></div>
+        </div>
+    </div>
+
+    <h2>Pending Withdrawals</h2>
+    <div class="requests-container" id="requestsList">
+        <div class="no-data">Loading requests...</div>
+    </div>
+
+    <!-- Firebase Logic -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, getDocs, query, where, doc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCZx7Oxr6BrmWG0l_jH15vhIckaE6LEfnw",
+            authDomain: "bet-99.firebaseapp.com",
+            projectId: "bet-99",
+            storageBucket: "bet-99.firebasestorage.app",
+            messagingSenderId: "124081153342",
+            appId: "1:124081153342:web:44ca17f215901a0eaab86f"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        const requestsList = document.getElementById('requestsList');
+        const totalProfitDisplay = document.getElementById('totalProfitDisplay');
+
+        // Note: For real security, we should check if user.role === 'admin'. 
+        // For testing, anyone who opens admin.html can see it, but keep the link hidden!
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                loadAdminData();
+            } else {
+                window.location.href = "index.html";
+            }
+        });
+
+        async function loadAdminData() {
+            try {
+                // 1. Calculate Total Admin Profit (Sum of all admin fees)
+                const allWithdrawalsSnap = await getDocs(collection(db, "withdrawals"));
+                let totalAdminProfit = 0;
+                
+                allWithdrawalsSnap.forEach(doc => {
+                    const data = doc.data();
+                    // Sirf Pending ya Approved requests ka fee count karo (Rejected ka nahi)
+                    if(data.status !== "Rejected" && data.adminFee) {
+                        totalAdminProfit += data.adminFee;
+                    }
+                });
+                totalProfitDisplay.innerText = totalAdminProfit;
+
+                // 2. Load Pending Requests
+                const q = query(collection(db, "withdrawals"), where("status", "==", "Pending"));
+                const pendingSnap = await getDocs(q);
+                
+                requestsList.innerHTML = ""; // Clear loading text
+                
+                if (pendingSnap.empty) {
+                    requestsList.innerHTML = '<div class="no-data">No pending requests! Relax.</div>';
+                    return;
+                }
+
+                pendingSnap.forEach(requestDoc => {
+                    const data = requestDoc.data();
+                    const reqId = requestDoc.id;
+
+                    const card = document.createElement('div');
+                    card.className = 'request-card';
+                    card.innerHTML = `
+                        <div class="req-detail"><span>User ID:</span> <span>${data.userId.substring(0, 8)}...</span></div>
+                        <div class="req-detail"><span>Requested Amount:</span> <span>${data.requestAmount} coins</span></div>
+                        <div class="req-detail"><span>Admin Fee Cut:</span> <span style="color: #00ff00;">+${data.adminFee} coins</span></div>
+                        <div class="req-detail"><span>Send to User:</span> <span class="highlight">${data.finalAmount}</span></div>
+                        
+                        <div class="action-btns">
+                            <button class="approve-btn" onclick="handleRequest('${reqId}', 'Approved', ${data.requestAmount}, '${data.userId}')">Approve</button>
+                            <button class="reject-btn" onclick="handleRequest('${reqId}', 'Rejected', ${data.requestAmount}, '${data.userId}')">Reject</button>
+                        </div>
+                    `;
+                    requestsList.appendChild(card);
+                });
+
+            } catch (error) {
+                console.error("Error loading admin data: ", error);
+                requestsList.innerHTML = '<div class="no-data" style="color: red;">Error loading data!</div>';
+            }
+        }
+
+        // Action Handler (Approve / Reject)
+        window.handleRequest = async function(reqId, action, amount, userId) {
+            const confirmAction = confirm(`Are you sure you want to ${action} this request?`);
+            if (!confirmAction) return;
+
+            try {
+                // Update request status
+                await updateDoc(doc(db, "withdrawals", reqId), {
+                    status: action
+                });
+
+                // Agar Reject kiya, toh user ko paise wapas karne hain (Refund)
+                if (action === "Rejected") {
+                    const userRef = doc(db, "users", userId);
+                    const userSnap = await getDoc(userRef);
+                    const currentBalance = userSnap.data().walletBalance || 0;
+                    
+                    await updateDoc(userRef, {
+                        walletBalance: currentBalance + amount
+                    });
+                    alert("Request Rejected! Paise user ke wallet mein wapas daal diye gaye hain.");
+                } else {
+                    alert("Request Approved! Ab tum user ko actual payment bhej sakte ho.");
+                }
+
+                // Refresh the panel
+                loadAdminData();
+            } catch (error) {
+                alert("Error: " + error.message);
+            }
+        }
+    </script>
+</body>
+</html>
