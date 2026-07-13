@@ -5,63 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>99 Bet - Withdraw</title>
     <style>
-        body {
-            background-color: #121212;
-            color: white;
-            font-family: Arial, sans-serif;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        /* Navbar */
-        .navbar {
-            width: 100%; background-color: #1e1e1e; padding: 15px 20px;
-            display: flex; justify-content: space-between; align-items: center;
-            box-sizing: border-box; border-bottom: 2px solid #ffcc00;
-        }
+        body { background-color: #121212; color: white; font-family: Arial, sans-serif; margin: 0; display: flex; flex-direction: column; align-items: center; padding-bottom: 30px;}
+        .navbar { width: 100%; background-color: #1e1e1e; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; border-bottom: 2px solid #ffcc00; }
         .logo { color: #ffcc00; font-size: 24px; font-weight: bold; text-decoration: none; }
         .wallet { background-color: #333; padding: 8px 15px; border-radius: 20px; font-weight: bold; }
         
-        /* Withdrawal Card */
-        .withdraw-card {
-            background-color: #1e1e1e; width: 85%; max-width: 400px;
-            margin-top: 40px; padding: 25px; border-radius: 15px;
-            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.5);
-        }
+        .withdraw-card { background-color: #1e1e1e; width: 85%; max-width: 400px; margin-top: 30px; padding: 25px; border-radius: 15px; box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.5); }
         h2 { color: #ffcc00; text-align: center; margin-top: 0; }
         
-        /* Wagering Status */
-        .status-box {
-            padding: 15px; border-radius: 8px; text-align: center; font-weight: bold; margin-bottom: 20px;
-        }
+        .status-box { padding: 10px; border-radius: 8px; text-align: center; font-weight: bold; margin-bottom: 20px; font-size: 14px;}
         .locked { background-color: #4a1919; color: #ff4444; border: 1px solid #ff4444; }
         .unlocked { background-color: #194a20; color: #00ff00; border: 1px solid #00ff00; }
         
-        .input-group { margin-bottom: 15px; }
-        .input-group label { display: block; margin-bottom: 5px; color: #ccc; font-size: 14px; }
-        input {
-            width: 100%; padding: 12px; border-radius: 8px; border: none;
-            background-color: #333; color: white; font-size: 16px; box-sizing: border-box;
-        }
+        .input-group { margin-bottom: 12px; }
+        .input-group label { display: block; margin-bottom: 5px; color: #ccc; font-size: 13px; }
+        input { width: 100%; padding: 12px; border-radius: 8px; border: none; background-color: #333; color: white; font-size: 14px; box-sizing: border-box; }
         
-        /* Fee Calculation Box */
-        .calculation-box {
-            background-color: #2a2a2a; padding: 10px; border-radius: 8px;
-            font-size: 14px; color: #bbb; margin-bottom: 20px;
-        }
+        .calculation-box { background-color: #2a2a2a; padding: 10px; border-radius: 8px; font-size: 13px; color: #bbb; margin-bottom: 20px; }
         .calculation-box div { display: flex; justify-content: space-between; margin-bottom: 5px; }
-        .total-receive { color: #ffcc00; font-weight: bold; font-size: 16px; border-top: 1px solid #444; padding-top: 5px; margin-top: 5px;}
+        .total-receive { color: #ffcc00; font-weight: bold; font-size: 15px; border-top: 1px solid #444; padding-top: 5px; margin-top: 5px;}
         
-        button {
-            width: 100%; padding: 15px; border: none; border-radius: 8px;
-            background-color: #ffcc00; color: black; font-weight: bold;
-            font-size: 16px; cursor: pointer; text-transform: uppercase;
-        }
+        button { width: 100%; padding: 15px; border: none; border-radius: 8px; background-color: #ffcc00; color: black; font-weight: bold; font-size: 16px; cursor: pointer; text-transform: uppercase; }
         button:disabled { background-color: #555; color: #888; cursor: not-allowed; }
-        
         .back-btn { text-align: center; margin-top: 20px; }
-        .back-btn a { color: #ffcc00; text-decoration: none; }
+        .back-btn a { color: #ffcc00; text-decoration: none; font-size: 14px;}
     </style>
 </head>
 <body>
@@ -74,13 +41,24 @@
     <div class="withdraw-card">
         <h2>Withdraw Funds</h2>
         
-        <!-- Wagering Status Indicator -->
-        <div id="wageringStatus" class="status-box locked">
-            Checking status...
+        <div id="wageringStatus" class="status-box locked">Checking status...</div>
+
+        <!-- Naye 3 Input Boxes (Receiving Details) -->
+        <div class="input-group">
+            <label>Account Title (Name)</label>
+            <input type="text" id="accName" placeholder="Correct Account Name">
+        </div>
+        <div class="input-group">
+            <label>Account Number (Easypaisa/JazzCash/Bank)</label>
+            <input type="text" id="accNumber" placeholder="Enter Account Number">
+        </div>
+        <div class="input-group">
+            <label>ID Card Number (CNIC)</label>
+            <input type="text" id="cnicNumber" placeholder="Enter 13-digit CNIC">
         </div>
 
-        <div class="input-group">
-            <label>Amount (Min: 200, Max: 2000)</label>
+        <div class="input-group" style="margin-top: 20px;">
+            <label>Withdraw Amount (Min: 200, Max: 2000)</label>
             <input type="number" id="withdrawAmount" placeholder="Enter amount to withdraw">
         </div>
 
@@ -97,7 +75,6 @@
         </div>
     </div>
 
-    <!-- Firebase Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -125,27 +102,22 @@
         const withdrawAmount = document.getElementById('withdrawAmount');
         const withdrawBtn = document.getElementById('withdrawBtn');
         
-        const calcReq = document.getElementById('calcReq');
-        const calcFee = document.getElementById('calcFee');
-        const calcFinal = document.getElementById('calcFinal');
+        // Naye fields ki IDs
+        const accName = document.getElementById('accName');
+        const accNumber = document.getElementById('accNumber');
+        const cnicNumber = document.getElementById('cnicNumber');
 
-        // Check Login and Fetch Data
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUserId = user.uid;
                 const docSnap = await getDoc(doc(db, "users", currentUserId));
-                
                 if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    userBalance = data.walletBalance;
+                    userBalance = docSnap.data().walletBalance;
                     balanceDisplay.innerText = userBalance;
-                    
-                    const required = data.wageringRequired || 0;
-                    
+                    const required = docSnap.data().wageringRequired || 0;
                     if (required > 0) {
                         wageringStatus.className = "status-box locked";
-                        wageringStatus.innerHTML = `🔒 Locked! Play bets worth ${required} more coins to unlock withdrawal.`;
-                        withdrawBtn.disabled = true;
+                        wageringStatus.innerHTML = `🔒 Locked! Play bets worth ${required} more coins.`;
                         isUnlocked = false;
                     } else {
                         wageringStatus.className = "status-box unlocked";
@@ -158,16 +130,13 @@
             }
         });
 
-        // Live calculation as user types
         withdrawAmount.addEventListener('input', () => {
             const amount = parseInt(withdrawAmount.value) || 0;
-            calcReq.innerText = amount;
-            
-            const fee = amount * 0.05; // 5% Admin Fee
-            calcFee.innerText = fee;
-            calcFinal.innerText = amount - fee;
+            document.getElementById('calcReq').innerText = amount;
+            const fee = amount * 0.05;
+            document.getElementById('calcFee').innerText = fee;
+            document.getElementById('calcFinal').innerText = amount - fee;
 
-            // Enable/Disable button based on rules
             if (isUnlocked && amount >= 200 && amount <= 2000 && amount <= userBalance) {
                 withdrawBtn.disabled = false;
             } else {
@@ -175,18 +144,20 @@
             }
         });
 
-        // Submit Withdrawal Request
         withdrawBtn.addEventListener('click', async () => {
             const amount = parseInt(withdrawAmount.value);
+            const nameVal = accName.value.trim();
+            const numVal = accNumber.value.trim();
+            const cnicVal = cnicNumber.value.trim();
             
-            if (amount < 200 || amount > 2000) {
-                alert("Amount 200 se 2000 ke darmiyan honi chahiye!");
+            // New Validation Check
+            if (!nameVal || !numVal || !cnicVal) {
+                alert("Please fill Account Name, Number, and CNIC!");
                 return;
             }
-            if (amount > userBalance) {
-                alert("Tumhare paas itna balance nahi hai!");
-                return;
-            }
+
+            if (amount < 200 || amount > 2000) return alert("Invalid Amount!");
+            if (amount > userBalance) return alert("Low balance!");
 
             withdrawBtn.disabled = true;
             withdrawBtn.innerText = "Processing...";
@@ -195,24 +166,24 @@
                 const fee = amount * 0.05;
                 const finalAmount = amount - fee;
 
-                // 1. User ka balance minus karo
                 const userRef = doc(db, "users", currentUserId);
-                await updateDoc(userRef, {
-                    walletBalance: userBalance - amount
-                });
+                await updateDoc(userRef, { walletBalance: userBalance - amount });
 
-                // 2. Withdrawal request 'withdrawals' table mein save karo
+                // Saving new details in Database
                 await addDoc(collection(db, "withdrawals"), {
                     userId: currentUserId,
+                    accountName: nameVal,
+                    accountNumber: numVal,
+                    cnic: cnicVal,
                     requestAmount: amount,
                     adminFee: fee,
                     finalAmount: finalAmount,
-                    status: "Pending", // Admin baad mein isko Approve/Reject karega
+                    status: "Pending",
                     timestamp: new Date()
                 });
 
                 alert(`Success! Tumhari ${finalAmount} ki withdrawal request lag gayi hai.`);
-                window.location.href = "dashboard.html"; // Wapas game par bhej do
+                window.location.href = "dashboard.html";
 
             } catch (error) {
                 alert("Error: " + error.message);
@@ -223,4 +194,3 @@
     </script>
 </body>
 </html>
-
