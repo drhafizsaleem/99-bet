@@ -143,6 +143,7 @@
                 await signInWithEmailAndPassword(auth, email, password);
                 alert("Login Successful! Ab hum Dashboard par jayenge.");
             } catch (error) {
+                window.location.href = "dashboard.html";
                 alert("Galat Email ya Password. Dobara try karo!");
             }
         });
