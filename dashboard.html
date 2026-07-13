@@ -6,70 +6,40 @@
     <title>99 Bet - Dashboard</title>
     <style>
         body {
-            background-color: #121212;
-            color: white;
-            font-family: Arial, sans-serif;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            background-color: #121212; color: white; font-family: Arial, sans-serif;
+            margin: 0; display: flex; flex-direction: column; align-items: center;
         }
-        /* Navbar Design */
+        /* Navbar */
         .navbar {
-            width: 100%;
-            background-color: #1e1e1e;
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-sizing: border-box;
-            border-bottom: 2px solid #ffcc00;
+            width: 100%; background-color: #1e1e1e; padding: 15px 20px;
+            display: flex; justify-content: space-between; align-items: center;
+            box-sizing: border-box; border-bottom: 2px solid #ffcc00;
         }
         .logo { color: #ffcc00; font-size: 24px; font-weight: bold; }
         .wallet { background-color: #333; padding: 8px 15px; border-radius: 20px; font-weight: bold; display: flex; align-items: center;}
         
-        /* Spin Wheel Design */
-        .game-container {
-            margin-top: 50px;
-            text-align: center;
-            position: relative;
-        }
+        /* Game Area */
+        .game-container { margin-top: 50px; text-align: center; position: relative; }
         .pointer {
-            position: absolute;
-            top: -15px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 0; 
-            height: 0; 
-            border-left: 15px solid transparent;
-            border-right: 15px solid transparent;
-            border-top: 30px solid #ffcc00;
-            z-index: 10;
+            position: absolute; top: -15px; left: 50%; transform: translateX(-50%);
+            width: 0; height: 0; border-left: 15px solid transparent;
+            border-right: 15px solid transparent; border-top: 30px solid #ffcc00; z-index: 10;
         }
         .wheel {
-            width: 280px;
-            height: 280px;
-            border-radius: 50%;
-            border: 5px solid #333;
-            background: conic-gradient(
-                #1e1e1e 0deg 90deg, 
-                #ffcc00 90deg 180deg, 
-                #333 180deg 270deg, 
-                #ffcc00 270deg 360deg
-            );
+            width: 280px; height: 280px; border-radius: 50%; border: 5px solid #333;
+            background: conic-gradient(#1e1e1e 0deg 90deg, #ffcc00 90deg 180deg, #333 180deg 270deg, #ffcc00 270deg 360deg);
             transition: transform 4s cubic-bezier(0.17, 0.67, 0.1, 1);
         }
         
+        /* Controls */
         .controls { margin-top: 30px; width: 80%; max-width: 300px; text-align: center; }
         .bet-input {
             width: 100%; padding: 12px; border-radius: 8px; border: none;
-            background-color: #333; color: white; font-size: 16px; text-align: center;
-            margin-bottom: 10px; box-sizing: border-box;
+            background-color: #333; color: white; font-size: 16px; text-align: center; margin-bottom: 10px; box-sizing: border-box;
         }
         .spin-btn {
             width: 100%; padding: 15px; border: none; border-radius: 8px;
-            background-color: #ffcc00; color: black; font-weight: bold;
-            font-size: 18px; cursor: pointer; text-transform: uppercase;
+            background-color: #ffcc00; color: black; font-weight: bold; font-size: 18px; cursor: pointer; text-transform: uppercase;
         }
         .spin-btn:disabled { background-color: #665200; cursor: not-allowed; }
         .status-msg { margin-top: 15px; font-size: 18px; color: #ffcc00; height: 25px; font-weight: bold;}
@@ -77,19 +47,15 @@
 </head>
 <body>
 
-    <!-- Header / Navbar with Demo Button -->
-            <div class="navbar">
+    <!-- Header / Navbar with Deposit & Withdraw -->
+    <div class="navbar">
         <div class="logo">99 Bet</div>
-        <div class="wallet" style="display: flex; align-items: center;">
+        <div class="wallet">
             💰 <span id="balanceDisplay">...</span>
-            <!-- Naya Deposit Link Button -->
-            <a href="deposit.html" style="padding: 5px 10px; margin-left: 10px; border-radius: 5px; background: #28a745; color: white; text-decoration: none; font-size: 12px; font-weight: bold; cursor: pointer;">Deposit</a>
-            
-            <a href="withdraw.html" style="padding: 5px 10px; margin-left: 10px; border-radius: 5px; background: #ff4444; color: white; text-decoration: none; font-size: 12px; font-weight: bold; cursor: pointer;">Withdraw</a>
+            <a href="deposit.html" style="padding: 5px 10px; margin-left: 10px; border-radius: 5px; background: #28a745; color: white; text-decoration: none; font-size: 12px; font-weight: bold;">Deposit</a>
+            <a href="withdraw.html" style="padding: 5px 10px; margin-left: 5px; border-radius: 5px; background: #ff4444; color: white; text-decoration: none; font-size: 12px; font-weight: bold;">Withdraw</a>
         </div>
     </div>
-
-
 
     <!-- Game Area -->
     <div class="game-container">
@@ -99,12 +65,12 @@
 
     <!-- Controls -->
     <div class="controls">
-        <input type="number" id="betAmount" class="bet-input" placeholder="Enter Bet Amount">
+        <input type="number" id="betAmount" class="bet-input" placeholder="Enter Bet (Min 10)">
         <button id="spinBtn" class="spin-btn">Spin Now</button>
         <div class="status-msg" id="statusMessage">Place your bet!</div>
     </div>
 
-    <!-- Firebase Connection & Game Logic -->
+    <!-- Firebase Connection & Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -130,10 +96,8 @@
         const wheel = document.getElementById('wheelElement');
         const spinBtn = document.getElementById('spinBtn');
         const statusMessage = document.getElementById('statusMessage');
-        const demoDepositBtn = document.getElementById('demoDepositBtn');
         const betInput = document.getElementById('betAmount');
 
-        // Tumhari Mathematical Probabilities (The House Edge)
         const wheelPrizes = [
             { name: "Loss (0x)", multiplier: 0, weight: 80 },    
             { name: "Double (2x)", multiplier: 2, weight: 19 },  
@@ -149,96 +113,102 @@
                 }
                 randomNum -= wheelPrizes[i].weight;
             }
+            return wheelPrizes[0]; // Fallback safe option
         }
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 currentUserId = user.uid;
-                const docSnap = await getDoc(doc(db, "users", currentUserId));
-                if (docSnap.exists()) {
-                    balanceDisplay.innerText = docSnap.data().walletBalance;
+                try {
+                    const docSnap = await getDoc(doc(db, "users", currentUserId));
+                    if (docSnap.exists()) {
+                        balanceDisplay.innerText = docSnap.data().walletBalance;
+                    }
+                } catch (e) {
+                    alert("Account load karne mein masla: " + e.message);
                 }
             } else {
                 window.location.href = "index.html";
             }
         });
 
-        // Demo Deposit Logic
-        demoDepositBtn.addEventListener('click', async () => {
-            demoDepositBtn.disabled = true;
-            const userRef = doc(db, "users", currentUserId);
-            const docSnap = await getDoc(userRef);
-            const currentBalance = docSnap.data().walletBalance || 0;
-            const currentTotalDeposits = docSnap.data().totalDeposits || 0;
-            const currentWagering = docSnap.data().wageringRequired || 0;
-
-            await updateDoc(userRef, {
-                walletBalance: currentBalance + 1000,
-                totalDeposits: currentTotalDeposits + 1000,
-                wageringRequired: currentWagering + 1000 
-            });
-            balanceDisplay.innerText = currentBalance + 1000;
-            alert("1000 Demo Coins deposited! Ab bet lagao.");
-            demoDepositBtn.disabled = false;
-        });
-
-        // Asli Game Logic
+        // Asli Game Logic with Error Tracking
         spinBtn.addEventListener('click', async () => {
-            const betAmount = parseInt(betInput.value);
-
-            if (isNaN(betAmount) || betAmount < 10) {
-                alert("Kam az kam 10 coins ki bet lagani hogi!");
-                return;
-            }
-
-            const userRef = doc(db, "users", currentUserId);
-            const docSnap = await getDoc(userRef);
-            const userData = docSnap.data();
-
-            if (userData.walletBalance < betAmount) {
-                alert("Wallet mein balance kam hai! Pehle deposit karein.");
-                return;
-            }
-
-            // Lock UI & Deduct Balance
-            spinBtn.disabled = true;
-            statusMessage.innerText = "Spinning...";
-            statusMessage.style.color = "#ffcc00";
-
-            let newWagering = userData.wageringRequired - betAmount;
-            if (newWagering < 0) newWagering = 0;
-
-            await updateDoc(userRef, {
-                walletBalance: userData.walletBalance - betAmount,
-                wageringRequired: newWagering
-            });
-            balanceDisplay.innerText = userData.walletBalance - betAmount;
-
-            // Result aur Animation
-            const result = getSpinResult();
-            const spinDegrees = Math.floor(Math.random() * 360) + 1440; 
-            currentRotation += spinDegrees;
-            wheel.style.transform = `rotate(${currentRotation}deg)`;
-
-            setTimeout(async () => {
-                if (result.multiplier > 0) {
-                    const winAmount = betAmount * result.multiplier;
-                    statusMessage.innerText = `Mubarak! You won ${winAmount}!`;
-                    statusMessage.style.color = "#00ff00";
-
-                    const freshSnap = await getDoc(userRef);
-                    await updateDoc(userRef, {
-                        walletBalance: freshSnap.data().walletBalance + winAmount,
-                        totalWinnings: (freshSnap.data().totalWinnings || 0) + winAmount
-                    });
-                    balanceDisplay.innerText = freshSnap.data().walletBalance + winAmount;
-                } else {
-                    statusMessage.innerText = "Oops! You lost.";
-                    statusMessage.style.color = "#ff4444";
+            try {
+                if (!currentUserId) {
+                    alert("Bhai, pehle account load hone do!");
+                    return;
                 }
-                
+
+                const betAmount = parseInt(betInput.value);
+
+                if (isNaN(betAmount) || betAmount < 10) {
+                    alert("Kam az kam 10 coins ki bet lagani hogi!");
+                    return;
+                }
+
+                const userRef = doc(db, "users", currentUserId);
+                const docSnap = await getDoc(userRef);
+                const userData = docSnap.data();
+
+                if (userData.walletBalance < betAmount) {
+                    alert("Tumhare paas itne coins nahi hain! Pehle deposit karo.");
+                    return;
+                }
+
+                // Lock UI
+                spinBtn.disabled = true;
+                statusMessage.innerText = "Spinning...";
+                statusMessage.style.color = "#ffcc00";
+
+                let newWagering = (userData.wageringRequired || 0) - betAmount;
+                if (newWagering < 0) newWagering = 0;
+
+                // Balance Deduct from Database
+                await updateDoc(userRef, {
+                    walletBalance: userData.walletBalance - betAmount,
+                    wageringRequired: newWagering
+                });
+                balanceDisplay.innerText = userData.walletBalance - betAmount;
+
+                // Animation Start
+                const result = getSpinResult();
+                const spinDegrees = Math.floor(Math.random() * 360) + 1440; 
+                currentRotation += spinDegrees;
+                wheel.style.transform = `rotate(${currentRotation}deg)`;
+
+                // Wait for animation to finish (4 seconds)
+                setTimeout(async () => {
+                    try {
+                        if (result.multiplier > 0) {
+                            const winAmount = betAmount * result.multiplier;
+                            statusMessage.innerText = `Mubarak! You won ${winAmount}!`;
+                            statusMessage.style.color = "#00ff00";
+
+                            const freshSnap = await getDoc(userRef);
+                            await updateDoc(userRef, {
+                                walletBalance: freshSnap.data().walletBalance + winAmount,
+                                totalWinnings: (freshSnap.data().totalWinnings || 0) + winAmount
+                            });
+                            balanceDisplay.innerText = freshSnap.data().walletBalance + winAmount;
+                        } else {
+                            statusMessage.innerText = "Oops! You lost.";
+                            statusMessage.style.color = "#ff4444";
+                        }
+                        
+                        spinBtn.disabled = false;
+                    } catch (winError) {
+                        alert("Winnings add karne mein masla: " + winError.message);
+                        spinBtn.disabled = false;
+                    }
+                }, 4000);
+
+            } catch (error) {
+                // Agar button press hone k baad koi bhi masla aaya toh alert aayega
+                alert("Game Error: " + error.message);
                 spinBtn.disabled = false;
-            }, 4000);
+                statusMessage.innerText = "Error try again!";
+            }
         });
     </script>
 </body>
