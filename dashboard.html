@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>99 Bet - Dashboard</title>
+    <style>
+        body {
+            background-color: #121212;
+            color: white;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        /* Navbar Design */
+        .navbar {
+            width: 100%;
+            background-color: #1e1e1e;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-sizing: border-box;
+            border-bottom: 2px solid #ffcc00;
+        }
+        .logo { color: #ffcc00; font-size: 24px; font-weight: bold; }
+        .wallet { background-color: #333; padding: 8px 15px; border-radius: 20px; font-weight: bold; }
+        
+        /* Spin Wheel Design */
+        .game-container {
+            margin-top: 50px;
+            text-align: center;
+            position: relative;
+        }
+        /* Pahiye ka arrow (jo bataega kahan ruka) */
+        .pointer {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0; 
+            height: 0; 
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-top: 30px solid #ffcc00;
+            z-index: 10;
+        }
+        /* CSS se bana hua Wheel */
+        .wheel {
+            width: 280px;
+            height: 280px;
+            border-radius: 50%;
+            border: 5px solid #333;
+            /* 4 colors ko repeat kar k slices banaye hain */
+            background: conic-gradient(
+                #1e1e1e 0deg 90deg, 
+                #ffcc00 90deg 180deg, 
+                #333 180deg 270deg, 
+                #ffcc00 270deg 360deg
+            );
+            transition: transform 4s cubic-bezier(0.17, 0.67, 0.1, 1); /* Smooth spinning effect */
+        }
+        
+        .controls { margin-top: 30px; width: 80%; max-width: 300px; }
+        .bet-input {
+            width: 100%; padding: 12px; border-radius: 8px; border: none;
+            background-color: #333; color: white; font-size: 16px; text-align: center;
+            margin-bottom: 10px;
+        }
+        .spin-btn {
+            width: 100%; padding: 15px; border: none; border-radius: 8px;
+            background-color: #ffcc00; color: black; font-weight: bold;
+            font-size: 18px; cursor: pointer; text-transform: uppercase;
+        }
+        .status-msg { margin-top: 15px; font-size: 18px; color: #ffcc00; height: 25px;}
+    </style>
+</head>
+<body>
+
+    <!-- Header / Navbar -->
+    <div class="navbar">
+        <div class="logo">99 Bet</div>
+        <div class="wallet">💰 <span id="balanceDisplay">Loading...</span></div>
+    </div>
+
+    <!-- Game Area -->
+    <div class="game-container">
+        <div class="pointer"></div>
+        <div class="wheel" id="wheelElement"></div>
+    </div>
+
+    <!-- Controls -->
+    <div class="controls">
+        <input type="number" id="betAmount" class="bet-input" placeholder="Enter Bet Amount (Min 10)">
+        <button id="spinBtn" class="spin-btn">Spin Now</button>
+        <div class="status-msg" id="statusMessage">Place your bet!</div>
+    </div>
+
+    <!-- Firebase Connection for Dashboard -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // Tumhari Keys
+        const firebaseConfig = {
+            apiKey: "AIzaSyCZx7Oxr6BrmWG0l_jH15vhIckaE6LEfnw",
+            authDomain: "bet-99.firebaseapp.com",
+            projectId: "bet-99",
+            storageBucket: "bet-99.firebasestorage.app",
+            messagingSenderId: "124081153342",
+            appId: "1:124081153342:web:44ca17f215901a0eaab86f"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Variables
+        let currentUserId = null;
+        const balanceDisplay = document.getElementById('balanceDisplay');
+        const wheel = document.getElementById('wheelElement');
+        const spinBtn = document.getElementById('spinBtn');
+        const statusMessage = document.getElementById('statusMessage');
+        let currentRotation = 0; // Pahiya kahan par hai
+
+        // Check if user is logged in
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUserId = user.uid;
+                // Fetch Wallet Balance
+                const docSnap = await getDoc(doc(db, "users", currentUserId));
+                if (docSnap.exists()) {
+                    balanceDisplay.innerText = docSnap.data().walletBalance;
+                }
+            } else {
+                // Agar login nahi hai toh wapas index par bhej do
+                window.location.href = "index.html";
+            }
+        });
+
+        // Basic Wheel Animation (Next step mein hum isme Backend Logic add karenge)
+        spinBtn.addEventListener('click', () => {
+            statusMessage.innerText = "Spinning...";
+            spinBtn.disabled = true; // Button lock kar do taake double click na ho
+            
+            // Random degrees for visual spin
+            const spinDegrees = Math.floor(Math.random() * 360) + 1440; // 4 chakkar + extra
+            currentRotation += spinDegrees;
+            
+            wheel.style.transform = `rotate(${currentRotation}deg)`;
+
+            // Jab pahiya ruk jaye (4 seconds baad)
+            setTimeout(() => {
+                statusMessage.innerText = "Game over (Logic pending)";
+                spinBtn.disabled = false;
+            }, 4000);
+        });
+    </script>
+</body>
+</html>
+
