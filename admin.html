@@ -5,48 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>99 Bet - Admin Panel</title>
     <style>
-        body {
-            background-color: #121212; color: white; font-family: Arial, sans-serif;
-            margin: 0; padding-bottom: 50px;
-        }
-        .navbar {
-            background-color: #ff0000; padding: 15px 20px;
-            display: flex; justify-content: space-between; align-items: center;
-            border-bottom: 2px solid #ffcc00;
-        }
+        body { background-color: #121212; color: white; font-family: Arial, sans-serif; margin: 0; padding-bottom: 50px; }
+        .navbar { background-color: #ff0000; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ffcc00; }
         .logo { color: white; font-size: 22px; font-weight: bold; text-decoration: none; }
         .admin-badge { background-color: #121212; color: #ffcc00; padding: 5px 10px; border-radius: 5px; font-size: 14px; font-weight: bold;}
-        
         .stats-container { padding: 20px; text-align: center; }
-        .profit-box {
-            background-color: #1e1e1e; padding: 20px; border-radius: 10px;
-            border: 1px solid #ffcc00; box-shadow: 0px 4px 10px rgba(255, 204, 0, 0.2);
-        }
+        .profit-box { background-color: #1e1e1e; padding: 20px; border-radius: 10px; border: 1px solid #ffcc00; box-shadow: 0px 4px 10px rgba(255, 204, 0, 0.2); }
         .profit-box h3 { margin: 0; color: #aaa; font-size: 16px; }
         .profit-amount { font-size: 32px; color: #00ff00; font-weight: bold; margin-top: 10px; }
-
         h2 { text-align: center; color: #ffcc00; margin-top: 30px; border-bottom: 1px solid #333; padding-bottom: 10px; width: 90%; margin-left: auto; margin-right: auto;}
         .data-container { padding: 10px 20px; }
-        
-        /* Cards Design */
-        .card {
-            background-color: #1e1e1e; padding: 15px; border-radius: 10px;
-            margin-bottom: 15px; border-left: 4px solid #ffcc00;
-        }
-        .user-card { border-left-color: #007bff; } /* Blue for users */
-        .deposit-card { border-left-color: #28a745; } /* Green for deposits */
-        
+        .card { background-color: #1e1e1e; padding: 15px; border-radius: 10px; margin-bottom: 15px; border-left: 4px solid #ffcc00; }
+        .user-card { border-left-color: #007bff; }
+        .deposit-card { border-left-color: #28a745; }
         .card-detail { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 14px;}
         .card-detail span:first-child { color: #aaa; }
         .card-detail span:last-child { font-weight: bold; }
-        
         .user-email { color: #ffcc00; font-size: 16px; font-weight: bold; margin-bottom: 10px; border-bottom: 1px solid #333; padding-bottom: 5px;}
         .highlight { color: #00ff00 !important; font-size: 16px;}
-        
+        .info-box { background-color: #333; padding: 10px; border-radius: 5px; margin: 10px 0; border-left: 3px solid #007bff; }
+        .info-box div { margin-bottom: 5px; font-size: 13px; }
+        .info-box span { color: #fff; font-weight: normal; }
         .action-btns { display: flex; gap: 10px; margin-top: 15px; }
         .approve-btn { flex: 1; padding: 10px; background-color: #28a745; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer;}
         .reject-btn { flex: 1; padding: 10px; background-color: #dc3545; color: white; border: none; border-radius: 5px; font-weight: bold; cursor: pointer;}
-
         .no-data { text-align: center; color: #888; font-style: italic; margin-top: 20px; }
     </style>
 </head>
@@ -57,7 +39,6 @@
         <div class="admin-badge">Control Room</div>
     </div>
 
-    <!-- Admin Profit Stats -->
     <div class="stats-container">
         <div class="profit-box">
             <h3>Total Admin Profit (5% Fees)</h3>
@@ -65,25 +46,15 @@
         </div>
     </div>
 
-    <!-- Section 1: Deposits (Naya Hissa) -->
     <h2 style="color: #28a745;">Pending Deposits</h2>
-    <div class="data-container" id="depositsList">
-        <div class="no-data">Loading deposits...</div>
-    </div>
+    <div class="data-container" id="depositsList"><div class="no-data">Loading deposits...</div></div>
 
-    <!-- Section 2: Withdrawals -->
     <h2>Pending Withdrawals</h2>
-    <div class="data-container" id="requestsList">
-        <div class="no-data">Loading requests...</div>
-    </div>
+    <div class="data-container" id="requestsList"><div class="no-data">Loading requests...</div></div>
 
-    <!-- Section 3: All Users Record -->
     <h2 style="color: #007bff;">All Registered Users</h2>
-    <div class="data-container" id="usersList">
-        <div class="no-data">Loading users...</div>
-    </div>
+    <div class="data-container" id="usersList"><div class="no-data">Loading users...</div></div>
 
-    <!-- Firebase Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
@@ -117,171 +88,112 @@
             }
         });
 
-        // 1. Load Pending Deposits
         async function loadDeposits() {
-            try {
-                const q = query(collection(db, "deposits"), where("status", "==", "Pending"));
-                const pendingSnap = await getDocs(q);
-                depositsList.innerHTML = ""; 
+            const pendingSnap = await getDocs(query(collection(db, "deposits"), where("status", "==", "Pending")));
+            depositsList.innerHTML = ""; 
+            if (pendingSnap.empty) return depositsList.innerHTML = '<div class="no-data">No pending deposits.</div>';
 
-                if (pendingSnap.empty) {
-                    depositsList.innerHTML = '<div class="no-data">No pending deposits.</div>';
-                    return;
-                }
-
-                pendingSnap.forEach(requestDoc => {
-                    const data = requestDoc.data();
-                    const reqId = requestDoc.id;
-
-                    const card = document.createElement('div');
-                    card.className = 'card deposit-card';
-                    card.innerHTML = `
-                        <div class="user-email">📧 ${data.userEmail || 'Unknown User'}</div>
-                        <div class="card-detail"><span>Deposit Amount:</span> <span class="highlight">${data.amount} coins</span></div>
-                        <div class="card-detail"><span>Payment Method:</span> <span>${data.method}</span></div>
-                        <div class="card-detail"><span>Transaction ID (TID):</span> <span style="color:#ffcc00;">${data.transactionId}</span></div>
-                        
-                        <div class="action-btns">
-                            <button class="approve-btn" onclick="handleDeposit('${reqId}', 'Approved', ${data.amount}, '${data.userId}')">Approve</button>
-                            <button class="reject-btn" onclick="handleDeposit('${reqId}', 'Rejected', ${data.amount}, '${data.userId}')">Reject</button>
-                        </div>
-                    `;
-                    depositsList.appendChild(card);
-                });
-            } catch (error) {
-                console.error("Error loading deposits: ", error);
-            }
+            pendingSnap.forEach(requestDoc => {
+                const data = requestDoc.data();
+                const reqId = requestDoc.id;
+                const card = document.createElement('div');
+                card.className = 'card deposit-card';
+                card.innerHTML = `
+                    <div class="user-email">📧 ${data.userEmail || 'User'}</div>
+                    <div class="card-detail"><span>Amount:</span> <span class="highlight">${data.amount} coins</span></div>
+                    <div class="card-detail"><span>Method:</span> <span>${data.method}</span></div>
+                    <div class="card-detail"><span>TID:</span> <span style="color:#ffcc00;">${data.transactionId}</span></div>
+                    <div class="action-btns">
+                        <button class="approve-btn" onclick="handleDeposit('${reqId}', 'Approved', ${data.amount}, '${data.userId}')">Approve</button>
+                        <button class="reject-btn" onclick="handleDeposit('${reqId}', 'Rejected', ${data.amount}, '${data.userId}')">Reject</button>
+                    </div>
+                `;
+                depositsList.appendChild(card);
+            });
         }
 
-        // Action Handler for Deposits
         window.handleDeposit = async function(reqId, action, amount, userId) {
-            const confirmAction = confirm(`Are you sure you want to ${action} this deposit?`);
-            if (!confirmAction) return;
-
-            try {
-                // Deposit status update karo
-                await updateDoc(doc(db, "deposits", reqId), { status: action });
-
-                if (action === "Approved") {
-                    // User ka wallet aur Wagering Requirement update karo
-                    const userRef = doc(db, "users", userId);
-                    const userSnap = await getDoc(userRef);
-                    const currentBalance = userSnap.data().walletBalance || 0;
-                    const currentTotalDeposits = userSnap.data().totalDeposits || 0;
-                    const currentWagering = userSnap.data().wageringRequired || 0;
-                    
-                    await updateDoc(userRef, { 
-                        walletBalance: currentBalance + amount,
-                        totalDeposits: currentTotalDeposits + amount,
-                        wageringRequired: currentWagering + amount
-                    });
-                    alert("Deposit Approved! User ke account mein paise add ho gaye hain.");
-                } else {
-                    alert("Deposit Rejected! Transaction ID invalid thi.");
-                }
-
-                loadDeposits(); // Refresh list
-                loadAllUsers(); // Refresh user balances
-            } catch (error) {
-                alert("Error: " + error.message);
+            if (!confirm(`Are you sure you want to ${action} this deposit?`)) return;
+            await updateDoc(doc(db, "deposits", reqId), { status: action });
+            if (action === "Approved") {
+                const userRef = doc(db, "users", userId);
+                const userSnap = await getDoc(userRef);
+                await updateDoc(userRef, { 
+                    walletBalance: (userSnap.data().walletBalance || 0) + amount,
+                    totalDeposits: (userSnap.data().totalDeposits || 0) + amount,
+                    wageringRequired: (userSnap.data().wageringRequired || 0) + amount
+                });
             }
+            loadDeposits(); loadAllUsers();
         }
 
-        // 2. Load Pending Withdrawals (Purana Code)
         async function loadWithdrawalsAndProfit() {
-            try {
-                const allWithdrawalsSnap = await getDocs(collection(db, "withdrawals"));
-                let totalAdminProfit = 0;
-                allWithdrawalsSnap.forEach(doc => {
-                    const data = doc.data();
-                    if(data.status !== "Rejected" && data.adminFee) { totalAdminProfit += data.adminFee; }
-                });
-                totalProfitDisplay.innerText = totalAdminProfit;
+            const allSnap = await getDocs(collection(db, "withdrawals"));
+            let totalProfit = 0;
+            allSnap.forEach(doc => { if(doc.data().status !== "Rejected" && doc.data().adminFee) totalProfit += doc.data().adminFee; });
+            totalProfitDisplay.innerText = totalProfit;
 
-                const q = query(collection(db, "withdrawals"), where("status", "==", "Pending"));
-                const pendingSnap = await getDocs(q);
-                requestsList.innerHTML = ""; 
+            const pendingSnap = await getDocs(query(collection(db, "withdrawals"), where("status", "==", "Pending")));
+            requestsList.innerHTML = ""; 
+            if (pendingSnap.empty) return requestsList.innerHTML = '<div class="no-data">No pending requests!</div>';
 
-                if (pendingSnap.empty) {
-                    requestsList.innerHTML = '<div class="no-data">No pending requests!</div>';
-                    return;
-                }
+            pendingSnap.forEach(requestDoc => {
+                const data = requestDoc.data();
+                const reqId = requestDoc.id;
+                const card = document.createElement('div');
+                card.className = 'card';
+                
+                // Naya Hissa: Yahan Admin ko user ki bank details nazar aayengi
+                card.innerHTML = `
+                    <div class="card-detail"><span>User ID:</span> <span>${data.userId.substring(0, 8)}...</span></div>
+                    
+                    <div class="info-box">
+                        <div><strong style="color:#007bff;">Transfer Details:</strong></div>
+                        <div>Name: <span>${data.accountName || 'N/A'}</span></div>
+                        <div>Account No: <span style="color:#ffcc00; font-weight:bold;">${data.accountNumber || 'N/A'}</span></div>
+                        <div>CNIC: <span>${data.cnic || 'N/A'}</span></div>
+                    </div>
 
-                pendingSnap.forEach(requestDoc => {
-                    const data = requestDoc.data();
-                    const reqId = requestDoc.id;
-
-                    const card = document.createElement('div');
-                    card.className = 'card';
-                    card.innerHTML = `
-                        <div class="card-detail"><span>User ID:</span> <span>${data.userId.substring(0, 8)}...</span></div>
-                        <div class="card-detail"><span>Requested Amount:</span> <span>${data.requestAmount} coins</span></div>
-                        <div class="card-detail"><span>Admin Fee Cut:</span> <span style="color: #00ff00;">+${data.adminFee} coins</span></div>
-                        <div class="card-detail"><span>Send to User:</span> <span class="highlight">${data.finalAmount}</span></div>
-                        
-                        <div class="action-btns">
-                            <button class="approve-btn" onclick="handleWithdrawal('${reqId}', 'Approved', ${data.requestAmount}, '${data.userId}')">Approve</button>
-                            <button class="reject-btn" onclick="handleWithdrawal('${reqId}', 'Rejected', ${data.requestAmount}, '${data.userId}')">Reject</button>
-                        </div>
-                    `;
-                    requestsList.appendChild(card);
-                });
-            } catch (error) {
-                console.error("Error loading withdrawals: ", error);
-            }
+                    <div class="card-detail"><span>Requested:</span> <span>${data.requestAmount} coins</span></div>
+                    <div class="card-detail"><span>Admin Fee Cut:</span> <span style="color: #00ff00;">+${data.adminFee} coins</span></div>
+                    <div class="card-detail"><span>Send Exactly:</span> <span class="highlight">${data.finalAmount}</span></div>
+                    
+                    <div class="action-btns">
+                        <button class="approve-btn" onclick="handleWithdraw('${reqId}', 'Approved', ${data.requestAmount}, '${data.userId}')">Approve</button>
+                        <button class="reject-btn" onclick="handleWithdraw('${reqId}', 'Rejected', ${data.requestAmount}, '${data.userId}')">Reject</button>
+                    </div>
+                `;
+                requestsList.appendChild(card);
+            });
         }
 
-        window.handleWithdrawal = async function(reqId, action, amount, userId) {
-            const confirmAction = confirm(`Are you sure you want to ${action} this request?`);
-            if (!confirmAction) return;
-
-            try {
-                await updateDoc(doc(db, "withdrawals", reqId), { status: action });
-
-                if (action === "Rejected") {
-                    const userRef = doc(db, "users", userId);
-                    const userSnap = await getDoc(userRef);
-                    const currentBalance = userSnap.data().walletBalance || 0;
-                    await updateDoc(userRef, { walletBalance: currentBalance + amount });
-                    alert("Request Rejected! Paise user ke wallet mein wapas daal diye gaye hain.");
-                } else {
-                    alert("Request Approved! Ab tum user ko actual payment bhej sakte ho.");
-                }
-
-                loadWithdrawalsAndProfit();
-                loadAllUsers(); 
-            } catch (error) {
-                alert("Error: " + error.message);
+        window.handleWithdraw = async function(reqId, action, amount, userId) {
+            if (!confirm(`Are you sure you want to ${action} this request?`)) return;
+            await updateDoc(doc(db, "withdrawals", reqId), { status: action });
+            if (action === "Rejected") {
+                const userRef = doc(db, "users", userId);
+                const userSnap = await getDoc(userRef);
+                await updateDoc(userRef, { walletBalance: (userSnap.data().walletBalance || 0) + amount });
             }
+            loadWithdrawalsAndProfit(); loadAllUsers();
         }
 
-        // 3. Load All Users Data (Purana Code)
         async function loadAllUsers() {
-            try {
-                const usersSnap = await getDocs(collection(db, "users"));
-                usersList.innerHTML = "";
+            const usersSnap = await getDocs(collection(db, "users"));
+            usersList.innerHTML = "";
+            if (usersSnap.empty) return usersList.innerHTML = '<div class="no-data">No users yet.</div>';
 
-                if (usersSnap.empty) {
-                    usersList.innerHTML = '<div class="no-data">No users registered yet.</div>';
-                    return;
-                }
-
-                usersSnap.forEach(userDoc => {
-                    const data = userDoc.data();
-                    const card = document.createElement('div');
-                    card.className = 'card user-card';
-                    card.innerHTML = `
-                        <div class="user-email" style="color: #007bff;">📧 ${data.email || 'Unknown User'}</div>
-                        <div class="card-detail"><span>Wallet Balance:</span> <span style="color: #ffcc00;">${data.walletBalance} coins</span></div>
-                        <div class="card-detail"><span>Total Deposits:</span> <span>${data.totalDeposits || 0}</span></div>
-                        <div class="card-detail"><span>Total Winnings:</span> <span>${data.totalWinnings || 0}</span></div>
-                        <div class="card-detail"><span>Wagering Target Left:</span> <span style="color: #ff4444;">${data.wageringRequired || 0}</span></div>
-                    `;
-                    usersList.appendChild(card);
-                });
-            } catch (error) {
-                console.error("Error loading users: ", error);
-            }
+            usersSnap.forEach(userDoc => {
+                const data = userDoc.data();
+                const card = document.createElement('div');
+                card.className = 'card user-card';
+                card.innerHTML = `
+                    <div class="user-email" style="color: #007bff;">📧 ${data.email || 'Unknown User'}</div>
+                    <div class="card-detail"><span>Wallet Balance:</span> <span style="color: #ffcc00;">${data.walletBalance} coins</span></div>
+                    <div class="card-detail"><span>Wagering Target Left:</span> <span style="color: #ff4444;">${data.wageringRequired || 0}</span></div>
+                `;
+                usersList.appendChild(card);
+            });
         }
     </script>
 </body>
