@@ -1,5 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>99 Bet - The Ultimate Gaming Platform</title>
+    <style>
+        /* Dark Theme Design */
+        body {
+            background-color: #121212;
+            color: white;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .login-box {
+            background-color: #1e1e1e;
+            padding: 30px;
+            border-radius: 15px;
+            width: 85%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.5);
+        }
+        h1 {
+            color: #ffcc00; /* Gold color */
+            margin-bottom: 20px;
+            font-size: 32px;
+            font-weight: bold;
+        }
+        input {
+            width: 90%;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border: none;
+            background-color: #333;
+            color: white;
+            font-size: 16px;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 15px;
+            border: none;
+            border-radius: 8px;
+            background-color: #ffcc00;
+            color: black;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button.signup-btn {
+            background-color: #333;
+            color: #ffcc00;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-box">
+        <h1>99 Bet</h1>
+        <p>Login to your account</p>
+        
+        <input type="email" id="email" placeholder="Enter Email">
+        <input type="password" id="password" placeholder="Enter Password">
+        
+        <button id="loginBtn">Login</button>
+        <button id="signupBtn" class="signup-btn">Create New Account</button>
+    </div>
+
+    <!-- Firebase Logic -->
     <script type="module">
-        // Firebase SDKs import kar rahe hain
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -14,18 +89,16 @@
             appId: "1:124081153342:web:44ca17f215901a0eaab86f"
         };
 
-        // Firebase Start 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        // HTML elements ko control mein lena
         const emailInput = document.getElementById('email');
         const passwordInput = document.getElementById('password');
         const loginBtn = document.getElementById('loginBtn');
         const signupBtn = document.getElementById('signupBtn');
 
-        // --- SIGN UP LOGIC (Naya Account Banana) ---
+        // Sign Up
         signupBtn.addEventListener('click', async () => {
             const email = emailInput.value;
             const password = passwordInput.value;
@@ -36,15 +109,14 @@
             }
 
             try {
-                // 1. User ka Auth account bnao
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
 
-                // 2. Database mein User ka Wallet aur Profile bnao
+                // Create Wallet
                 await setDoc(doc(db, "users", user.uid), {
                     email: email,
                     walletBalance: 0,
-                    wageringRequired: 0, // Withdrawal condition
+                    wageringRequired: 0,
                     totalDeposits: 0,
                     totalWinnings: 0,
                     role: "user",
@@ -52,13 +124,12 @@
                 });
 
                 alert("Account Ban Gaya! 99 Bet mein Khushamdeed.");
-                
             } catch (error) {
                 alert("Error: " + error.message);
             }
         });
 
-        // --- LOGIN LOGIC (Purane Account se Login Karna) ---
+        // Login
         loginBtn.addEventListener('click', async () => {
             const email = emailInput.value;
             const password = passwordInput.value;
@@ -69,16 +140,12 @@
             }
 
             try {
-                // Firebase check karega k details theek hain ya nahi
                 await signInWithEmailAndPassword(auth, email, password);
                 alert("Login Successful! Ab hum Dashboard par jayenge.");
-                
-                // Note: Agle step mein hum yahan dashboard.html par redirect karenge
-                // window.location.href = "dashboard.html"; 
-
             } catch (error) {
                 alert("Galat Email ya Password. Dobara try karo!");
             }
         });
-                </script>
-                
+    </script>
+</body>
+</html>
